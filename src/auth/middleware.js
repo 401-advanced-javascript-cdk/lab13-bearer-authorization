@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
     }
   }
   catch(e) {
-    next(e);
+    res.sendStatus(403);
   }
   
   function _authBasic(str) {

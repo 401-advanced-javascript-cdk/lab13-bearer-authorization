@@ -31,10 +31,10 @@ describe('Auth Router', () => {
         return mockRequest.post('/signup')
           .send(users[userType])
           .then(results => {
-            var token = jwt.verify(results.text, process.env.SECRET);
+            var data = jwt.verify(results.text, process.env.SECRET);
             id = token.id;
             encodedToken = results.text;
-            expect(token.id).toBeDefined();
+            expect(data.token.id).toBeDefined();
           });
       });
 
@@ -42,13 +42,35 @@ describe('Auth Router', () => {
         return mockRequest.post('/signin')
           .auth(users[userType].username, users[userType].password)
           .then(results => {
-            var token = jwt.verify(results.text, process.env.SECRET);
-            expect(token.id).toEqual(id);
+            var data = jwt.verify(results.text, process.env.SECRET);
+            expect(data.token.id).toEqual(id);
           });
       });
 
     });
     
   });
-  
+
+  it('once the user has a token, the user can access the /test-token route', () => {
+    let req = {};
+    let res = {};
+    let next = jest.fn();
+    let middleware = auth;
+    mockRequest.get('/test-token')
+    .then(results => {
+      expect(results.body).toBe('Forbidden');
+    })
+    .then(
+      mockRequest.post('/signin')
+        .auth('a_user', 'a_password')
+      )
+    .then(response => {
+      let token = response.body;
+      return mockRequest.get('/test-token')
+        .set('Authorization', `Bearer ${token}`)
+        .then(results => {
+          expect(results.status).toBe(200);
+        });
+    });
+  });
 });
