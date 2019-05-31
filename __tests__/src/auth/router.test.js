@@ -50,5 +50,27 @@ describe('Auth Router', () => {
     });
     
   });
-  
+
+  it('once the user has a token, the user can access the /test-token route', () => {
+    let req = {};
+    let res = {};
+    let next = jest.fn();
+    let middleware = auth;
+    mockRequest.get('/test-token')
+    .then(results => {
+      expect(results.body).toBe('Forbidden');
+    })
+    .then(
+      mockRequest.post('/signin')
+        .auth('a_user', 'a_password')
+      )
+    .then(response => {
+      let token = response.body;
+      return mockRequest.get('/test-token')
+        .set('Authorization', `Bearer ${token}`)
+        .then(results => {
+          expect(results.status).toBe(200);
+        });
+    });
+  });
 });

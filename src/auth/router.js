@@ -11,7 +11,7 @@ authRouter.post('/signup', (req, res, next) => {
   let user = new User(req.body);
   user.save()
     .then( (user) => {
-      req.token = user.generateToken();
+      req.token = user.generateTimedToken();
       req.user = user;
       res.set('token', req.token);
       res.cookie('auth', req.token);
@@ -32,12 +32,17 @@ authRouter.get('/oauth', (req,res,next) => {
     .catch(next);
 });
 
-authRouter.get('/test-auth-route', auth, (req, res, next) => {
+authRouter.get('/test-token', auth, (req, res, next) => {
   res.sendStatus(200);
 });
 
 authRouter.get('/key', auth, (req, res, next) => {
-  res.sendStatus(200);
+  if(req.user.role !== 'admin') {
+    res.status(403).send('Forbidden');
+  }
+  else {
+    res.sendStatus(200);
+  }
 });
 
 module.exports = authRouter;
