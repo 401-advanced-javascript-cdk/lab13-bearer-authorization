@@ -17,7 +17,7 @@ module.exports = (req, res, next) => {
     }
   }
   catch(e) {
-    next(e);
+    res.status(403).send('Forbidden');
   }
   
   function _authBasic(str) {
@@ -33,22 +33,20 @@ module.exports = (req, res, next) => {
   }
 
   function _authBearer(token) {
-    if (process.env.TOKEN_SCHEME === 'expires') {
+    try {
       return User.authenticateToken(token)
         .then(user => _authenticate(user))
-        .catch(console.error);
+        .catch(console.error)
+    }
+    catch(e) {
+      res.sendStatus(403);
     }
   }
 
   function _authenticate(user) {
     if(user) {
       req.user = user;
-      if(req.user.role !== 'admin') {
-        req.token = user.generateTimedToken();
-      }
-      else if(req.user.role === 'admin') {
-        req.token = user.generateKeyToken();
-      }
+      req.token = user.generateToken();
       next();
     }
     else {

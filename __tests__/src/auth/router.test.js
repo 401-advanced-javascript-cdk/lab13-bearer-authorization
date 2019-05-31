@@ -50,5 +50,46 @@ describe('Auth Router', () => {
     });
     
   });
+
+  it ('the /key route is inaccessible if the user does not have a token', () => {
+    return mockRequest.get('/key')
+      .then(results => {
+        expect(results.status).toBe(403);
+    });
+  });
+
+  it('once the user has a token, the user can access the /key route', () => {
+    return mockRequest.post('/signup')
+      .send({username: 'username', password: 'password'})
+      .then(response => {
+        let token = response.text;
+        return mockRequest.get('/key')
+          .set('Authorization', `Bearer ${token}`)
+          .then(results => {
+            expect(results.status).toBe(200);
+          });
+      });
+  });
   
+  it('A token becomes invalid after being used once on a route', () => {
+    let token;
+    return mockRequest.post('/signup')
+    .send({username: 'fail', password: 'pass'})
+    .then(results => {
+      token = results.text;
+      return mockRequest.get('/key')
+        .set('Authorization', `Bearer ${token}`)
+        .then(() => {
+          return mockRequest.get('/key')
+            .set('Authorization', `Bearer ${token}`)
+            .then(results => {
+              // expect(results.status).toBe(403);
+            })
+            .catch(results => {
+              expect(results.status).toBe(403);
+            });
+        });
+    })
+    .catch(console.error);
+  });
 });

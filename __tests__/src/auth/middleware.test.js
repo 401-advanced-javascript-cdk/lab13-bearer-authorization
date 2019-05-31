@@ -68,7 +68,24 @@ describe('Auth Middleware', () => {
           expect(next).toHaveBeenCalledWith();
         });
 
-    }); // it()
+    });
+
+    it('collects a token upon signing up', () => {
+      let req = {
+        headers: {
+          authorization: 'Basic YWRtaW46cGFzc3dvcmQ=',
+        },
+      };
+      let res = {};
+      let next = jest.fn();
+      let middleware = auth;
+      return middleware(req,res,next)
+      .then( () => {
+        cachedToken = req.token;
+        expect(cachedToken).toBeDefined();
+        expect(typeof cachedToken).toBe('string');
+      });
+    });
     
   });
 
