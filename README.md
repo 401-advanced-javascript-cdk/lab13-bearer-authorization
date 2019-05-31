@@ -1,11 +1,11 @@
 ## Lab 13 - Bearer Authorization
-Implements Bearer authorization tokens
+Implements Bearer authorization tokens and routes that use them.
 ### Author: Chris Kozlowski
 
 ### Links and Resources
-* [Submission PR](https://github.com/401-advanced-javascript-cdk/lab11-authentication/pull/1)
-* [Travis](https://travis-ci.com/401-advanced-javascript-cdk/lab11-authentication)
-* [Heroku Deployment](https://lab11-authentication.herokuapp.com/)
+* [Submission PR](https://github.com/401-advanced-javascript-cdk/lab13-bearer-authorization/pull/1)
+* [Travis](https://travis-ci.com/401-advanced-javascript-cdk/lab13-bearer-authorization)
+* [Heroku Deployment](https://lab13-bearer-auth.herokuapp.com/)
 
 ### Modules
 #### `auth/router.js`
