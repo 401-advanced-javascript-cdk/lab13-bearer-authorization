@@ -11,6 +11,8 @@ const users = new mongoose.Schema({
   role: {type: String, default:'user', enum: ['admin','editor','user']},
 });
 
+const usedTokens = [];
+
 users.pre('save', function(next) {
   bcrypt.hash(this.password, 10)
     .then(hashedPassword => {
@@ -30,13 +32,12 @@ users.statics.createFromOauth = function(email) {
       console.log('Welcome Back', user.username);
       return user;
     })
-    .catch( error => {
+    .catch(error => {
       console.log('Creating new user');
       let username = email;
       let password = 'none';
       return this.create({username, password, email});
     });
-
 };
 
 users.statics.authenticateBasic = function(auth) {
@@ -47,44 +48,40 @@ users.statics.authenticateBasic = function(auth) {
 };
 
 users.statics.authenticateToken = function(token) {
+  if (usedTokens.includes(token)) {
+    throw new Error('token already used');
+  }
   const decryptedToken = jwt.verify(token, process.env.SECRET);
-  return this.findOne({_id: decryptedToken.data.id});
+  if (!!process.env.SINGLE_USE_TOKENS) {
+    if(decryptedToken.type !== 'key') {
+      usedTokens.push(token);
+    }
+  }
+  return this.findOne({_id: decryptedToken.id});
 };
 
 users.methods.comparePassword = function(password) {
   return bcrypt.compare( password, this.password )
-    .then( valid => valid ? this : null);
+    .then(valid => valid ? this : null);
 };
 
-// users.methods.generateToken = function() {
-  
-//   let token = {
-//     id: this._id,
-//     role: this.role,
-//   };
-  
-//   return jwt.sign(token, process.env.SECRET);
-// };
-
-users.methods.generateTimedToken = function() {
-  
+users.methods.generateToken = function(type) {
   let token = {
     id: this._id,
     role: this.role,
+    type: type || 'user',
   };
-  
-  return jwt.sign({exp: Math.floor(Date.now() / 1000) + (15 * 60), data: token}, process.env.SECRET);
+
+  if (token.type !== 'key') {
+    return jwt.sign( token, process.env.SECRET, { expiresIn: process.env.TOKEN_EXPIRATION_TIME || 900 } );
+  }
+  else {
+    return jwt.sign(token, process.env.SECRET)
+  }
 };
 
-users.methods.generateKeyToken = function() {
-  const token = {
-    id: this._id,
-    role: this.role,
-  };
-
-  if (token.role === 'admin') {
-    console.log('signing in with auth key:', {token})
-    return jwt.sign({data: token, type: 'key'}, process.env.SECRET);
-  }
+users.methods.generateKey = function() {
+  return this.generateToken('key');
 }
+
 module.exports = mongoose.model('users', users);
