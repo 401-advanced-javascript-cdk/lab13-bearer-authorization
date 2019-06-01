@@ -3,7 +3,7 @@ Implements Bearer authorization tokens and routes that use them.
 ### Author: Chris Kozlowski
 
 ### Links and Resources
-* [Submission PR](https://github.com/401-advanced-javascript-cdk/lab13-bearer-authorization/pull/1)
+* [Submission PR](https://github.com/401-advanced-javascript-cdk/lab13-bearer-authorization/pull/2)
 * [Travis](https://travis-ci.com/401-advanced-javascript-cdk/lab13-bearer-authorization)
 * [Heroku Deployment](https://lab13-bearer-auth.herokuapp.com/)
 
